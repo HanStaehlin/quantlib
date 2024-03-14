@@ -1,5 +1,7 @@
 import unittest
 import torch
+from algorithms.pact import pact_ops
+from pact_ops import _PACTActivation
 
 class TestPACTActivation(unittest.TestCase):
     def setUp(self):
