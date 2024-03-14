@@ -20,4 +20,4 @@ jobs:
         run: |
           # Add your code here to build the model
           # For example:
-          python build_model.py
+          python test_pact_ops.py
