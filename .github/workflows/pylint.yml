@@ -19,7 +19,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1
-        pip install ipython packaging parse setuptools tensorboard tqdm networkx python-graphviz scipy pandas ipdb onnx onnxruntime einops yapf tabulate
+        pip install ipython packaging parse setuptools tensorboard tqdm networkx scipy pandas ipdb onnx onnxruntime einops yapf tabulate
         pip install setuptools
         
     - name: Analysing the code with pylint
