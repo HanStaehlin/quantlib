@@ -16,8 +16,9 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: Build Model
+      - name: Pact Tests
         run: |
           # Add your code here to build the model
           # For example:
+          pip install .
           python algorithms/pact/test_pact_ops.py
