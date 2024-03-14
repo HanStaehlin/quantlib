@@ -1,6 +1,6 @@
 import unittest
 import torch
-from .pact_ops import _PACTActivation
+from pact_ops import _PACTActivation
 
 class TestPACTActivation(unittest.TestCase):
     def setUp(self):
