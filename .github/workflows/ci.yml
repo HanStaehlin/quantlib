@@ -24,5 +24,6 @@ jobs:
           pip install ipython packaging parse setuptools tensorboard tqdm networkx scipy pandas ipdb onnx onnxruntime einops yapf tabulate
           pip install setuptools
           pip install .
+          python from algorithms.pact import pact_ops
           python algorithms/pact/test_pact_ops.py
           
