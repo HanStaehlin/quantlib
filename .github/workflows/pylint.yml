@@ -18,7 +18,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pylint
-        pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1+cu116
+        pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1
         pip install ipython packaging parse setuptools tensorboard tqdm networkx python-graphviz scipy pandas ipdb onnx onnxruntime einops yapf tabulate
         pip install setuptools
         
