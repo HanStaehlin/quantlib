@@ -16,8 +16,13 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: Build Model
+      - name: Pact Tests
         run: |
           # Add your code here to build the model
           # For example:
-          python build_model.py
+          pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1
+          pip install ipython packaging parse setuptools tensorboard tqdm networkx scipy pandas ipdb onnx onnxruntime einops yapf tabulate
+          pip install setuptools
+          pip install .
+          python algorithms/pact/test_pact_ops.py
+          
