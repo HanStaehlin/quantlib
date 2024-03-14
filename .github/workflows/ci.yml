@@ -16,3 +16,8 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: Build Model
+        run: |
+          # Add your code here to build the model
+          # For example:
+          python build_model.py
