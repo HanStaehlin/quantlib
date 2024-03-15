@@ -38,7 +38,7 @@ class TestPACTActivation(unittest.TestCase):
         self.activation.init_clip = 'percentile'
         self.activation.started = torch.tensor(True)
         self.activation.histogram = torch.tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-        self.activation.prevEdges.data = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        self.activation.prevEdges = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         self.activation.truemax.data = torch.tensor(10.0)
         self.activation.truemin.data = torch.tensor(0.0)
         self.activation.ready.data = torch.tensor(True)
