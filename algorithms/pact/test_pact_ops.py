@@ -18,7 +18,7 @@ class TestPACTActivation(unittest.TestCase):
         self.activation.running_mean.data = torch.tensor(0.0)
         self.activation.running_var.data = torch.tensor(1.0)
 
-        #self.activation.update_clipping_params()
+        self.updateClipBounds()
 
         self.assertAlmostEqual(self.activation.clip_hi.item(), 5.0)
         self.assertAlmostEqual(self.activation.clip_lo.item(), -5.0)
@@ -43,7 +43,7 @@ class TestPACTActivation(unittest.TestCase):
         self.activation.truemin = torch.tensor(0.0)
         self.activation.ready = torch.tensor(True)
 
-        #self.activation.update_clipping_params()
+        self.updateClipBounds()
 
         self.assertAlmostEqual(self.activation.clip_hi.item(), 10.0)
         self.assertAlmostEqual(self.activation.clip_lo.item(), 0.0)
