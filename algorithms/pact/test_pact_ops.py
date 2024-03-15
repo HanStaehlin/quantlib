@@ -12,7 +12,7 @@ class TestPACTActivation(unittest.TestCase):
         self.assertEqual(output.shape, input.shape)
 
     def test_clipping_params(self):
-        self.activation.started = True
+        self.activation.started = torch.tensor(True)
         self.activation.max.data = torch.tensor(5.0)
         self.activation.min.data = torch.tensor(-5.0)
         self.activation.running_mean.data = torch.tensor(0.0)
@@ -25,7 +25,7 @@ class TestPACTActivation(unittest.TestCase):
 
     def test_tqt_quantization(self):
         self.activation.tqt = True
-        self.activation.noisy = False
+        self.activation.noisy = torch.tensor(False)
         self.activation.learn_clip = True
         self.activation.symm = True
 
@@ -36,7 +36,7 @@ class TestPACTActivation(unittest.TestCase):
 
     def test_init_clip_percentile(self):
         self.activation.init_clip = 'percentile'
-        self.activation.started = True
+        self.activation.started = torch.tensor(True)
         self.activation.histogram.data = torch.tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         self.activation.prevEdges.data = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         self.activation.truemax.data = torch.tensor(10.0)
