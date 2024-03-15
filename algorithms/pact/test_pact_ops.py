@@ -39,9 +39,9 @@ class TestPACTActivation(unittest.TestCase):
         self.activation.started = torch.tensor(True)
         self.activation.histogram = torch.tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         self.activation.prevEdges = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-        self.activation.truemax.data = torch.tensor(10.0)
-        self.activation.truemin.data = torch.tensor(0.0)
-        self.activation.ready.data = torch.tensor(True)
+        self.activation.truemax = torch.tensor(10.0)
+        self.activation.truemin = torch.tensor(0.0)
+        self.activation.ready = torch.tensor(True)
 
         #self.activation.update_clipping_params()
 
