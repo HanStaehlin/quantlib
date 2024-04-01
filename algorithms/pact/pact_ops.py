@@ -1795,7 +1795,7 @@ class PACTIntegerSoftmax(torch.nn.Module):
         :rtype:
 
         """
-        eps = eps
+        eps = torch.Tensor((eps,))
         eps2 = torch.Tensor((0.3585,))
 
         self.coeffA.data[0] = torch.round(0.3585/eps2)
