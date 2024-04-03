@@ -585,7 +585,7 @@ class PACTIntegerConcat(torch.nn.Module):
         self.clip_lo = self.acts[0].clip_lo
         self.clip_hi = self.acts[0].clip_hi
         self.n_levels = self.acts[0].n_levels
-        self.force_out_eps = force_out_eps
+        self.force_out_eps = False
 
     def reassign_epsilons(self):
         if not self.force_out_eps:
@@ -1668,7 +1668,7 @@ class PACTIntegerExp(torch.nn.Module):
             coeffC_ = g.op("Constant", value_t=coeffC)
             n_levels_ = g.op("Constant", value_t=n_levels)
 
-            return g.op("PACTOps::iExp", x, log2_t=log2, coeffA_t=coeffA, coeffB_t=coeffB,  coeffC_t=coeffC, n_levels_t=n_levels)
+            return g.op("PACTOps::iExp", x, log2_t=log2, coeffA_tf=coeffA, coeffB_t=coeffB,  coeffC_t=coeffC, n_levels_t=n_levels)
 
     def updateCoeffs(self, eps):
         """Updates the coefficients, usually only done with the IntegerizeSoftmax pass
@@ -1685,7 +1685,7 @@ class PACTIntegerExp(torch.nn.Module):
         eps2 = torch.Tensor((0.3585,)).type_as(eps)
 
         self.coeffA.data[0] = torch.round(0.3585/eps2) * eps2
-        self.coeffB.data[0] = torch.round(1.353/eps) * eps
+        self.coeffB.data[0] = torch.round(1.353/eps)f * eps
         self.coeffC.data[0] = torch.round(0.344/(eps**2*eps2)) * eps**2*eps2
 
         #self.log2.data[0] = 2**torch.round(torch.Tensor((math.log2(math.log2(2)/(eps)),)))

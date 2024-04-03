@@ -1,22 +1,22 @@
-name: GitHub Actions Tests
-run-name: ${{ github.actor }} has made a commit 🚀
+name: Quantlib Tests
+run-name: ${{ github.actor }} has made a commit
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Run_Quantlib_Tests:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - run: echo "The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "The workflow is now ready to test your code on the runner."
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: Pact Tests
+      - run: echo "This job's status is ${{ job.status }}."
+      - name: Imports
         run: |
           # Add your code here to build the model
           # For example:
@@ -24,5 +24,12 @@ jobs:
           pip install ipython packaging parse setuptools tensorboard tqdm networkx scipy pandas ipdb onnx onnxruntime einops yapf tabulate
           pip install setuptools
           pip install .
-          python algorithms/pact/test_pact_ops.py
           
+      - name: Pact Tests
+        run: | 
+          python algorithms/pact/test_pact_ops.py
+      - name: Eps Tests
+        run: | 
+          python editing/fx/passes/test_eps.py 
+      - run: echo "This job's status is ${{ job.status }}."
+s

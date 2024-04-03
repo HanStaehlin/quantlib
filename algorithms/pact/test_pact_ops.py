@@ -1,6 +1,6 @@
 import unittest
 import torch
-from quantlib.algorithms.pact.pact_ops import _PACTActivation
+from quantlib.algorithms.pact.pact_ops import _PACTActivation, PACTIntegerConcat
 
 class TestPACTActivation(unittest.TestCase):
     def setUp(self):
@@ -59,6 +59,21 @@ class TestPACTActivation(unittest.TestCase):
 
         self.assertIsInstance(result, torch.Tensor)
 
+class TestPACTIntegerConcat(unittest.TestCase):
+    def setUp(self):
+        force_out_eps = False
+        self.concat = PACTIntegerConcat(num_args=3, dim=1, stack_flag=False, signed=True, n_levels=256, init_clip='max', learn_clip=True, act_kind='relu', leaky=0.1)
+
+    def test_reassign_epsilons(self):
+        self.concat.reassign_epsilons()
+        self.assertTrue(self.concat.epsilons[0].requires_grad)
+
+    def test_forward(self):
+        input1 = torch.randn(10, 10)
+        input2 = torch.randn(10, 10)
+        input3 = torch.randn(10, 10)
+        output = self.concat(input1, input2, input3)
+        self.assertEqual(output.shape, (10, 30))
 
 if __name__ == '__main__':
     unittest.main()
