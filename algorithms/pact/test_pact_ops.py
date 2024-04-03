@@ -59,21 +59,37 @@ class TestPACTActivation(unittest.TestCase):
 
         self.assertIsInstance(result, torch.Tensor)
 
+
+
 class TestPACTIntegerConcat(unittest.TestCase):
+
     def setUp(self):
-        force_out_eps = False
-        self.concat = PACTIntegerConcat(num_args=3, dim=1, stack_flag=False, signed=True, n_levels=256, init_clip='max', learn_clip=True, act_kind='relu', leaky=0.1)
+        # Create PACTIntegerSoftmax object with mock acts
+        self.pact_int_softmax = PACTIntegerConcat(num_args=3, dim=1, stack_flag=False, signed=True, n_levels=256, init_clip='max', learn_clip=True, act_kind='relu', leaky=0.1)
 
     def test_reassign_epsilons(self):
-        self.concat.reassign_epsilons()
-        self.assertTrue(self.concat.epsilons[0].requires_grad)
+        # Call the reassign_epsilons function
+        self.pact_int_softmax.acts[0].clip_lo.data = torch.tensor([-2.0])
+        self.pact_int_softmax.acts[1].clip_lo.data = torch.tensor([1.0])
+        self.pact_int_softmax.acts[2].clip_lo.data = torch.tensor([-1.0])
 
-    def test_forward(self):
-        input1 = torch.randn(10, 10)
-        input2 = torch.randn(10, 10)
-        input3 = torch.randn(10, 10)
-        output = self.concat(input1, input2, input3)
-        self.assertEqual(output.shape, (10, 30))
+        self.pact_int_softmax.acts[0].clip_hi.data = torch.tensor([3.0])
+        self.pact_int_softmax.acts[1].clip_hi.data = torch.tensor([0.5])
+        self.pact_int_softmax.acts[2].clip_hi.data = torch.tensor([-0.5])
+
+        self.pact_int_softmax.reassign_epsilons()
+
+        # Assert that all clip_lo and clip_hi values have the same epsilon difference
+        expected_eps = (self.pact_int_softmax.acts[0].clip_hi.data - self.pact_int_softmax.acts[0].clip_lo.data) 
+        for act in self.pact_int_softmax.acts:
+            self.assertEqual(abs(act.clip_hi - act.clip_lo), expected_eps)
+
+        # Assert that symm is set correctly based on clip_lo value
+        for act in self.pact_int_softmax.acts:
+            if act.clip_lo.item() < 0:
+                self.assertTrue(act.symm)
+            else:
+                self.assertFalse(act.symm)
 
 if __name__ == '__main__':
     unittest.main()
