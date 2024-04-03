@@ -32,4 +32,3 @@ jobs:
         run: | 
           python editing/fx/passes/test_eps.py 
       - run: echo "This job's status is ${{ job.status }}."
-s
