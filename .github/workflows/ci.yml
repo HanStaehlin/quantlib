@@ -24,11 +24,11 @@ jobs:
           pip install ipython packaging parse setuptools tensorboard tqdm networkx scipy pandas ipdb onnx onnxruntime einops yapf tabulate
           pip install setuptools
           pip install .
-          
+      - name: Eps Tests
+        run: | 
+          python editing/fx/passes/test_eps.py     
       - name: Pact Tests
         run: | 
           python algorithms/pact/test_pact_ops.py
-      - name: Eps Tests
-        run: | 
-          python editing/fx/passes/test_eps.py 
+
       - run: echo "This job's status is ${{ job.status }}."
