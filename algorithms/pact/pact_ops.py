@@ -1685,7 +1685,7 @@ class PACTIntegerExp(torch.nn.Module):
         eps2 = torch.Tensor((0.3585,)).type_as(eps)
 
         self.coeffA.data[0] = torch.round(0.3585/eps2) * eps2
-        self.coeffB.data[0] = torch.round(1.353/eps)f * eps
+        self.coeffB.data[0] = torch.round(1.353/eps) * eps
         self.coeffC.data[0] = torch.round(0.344/(eps**2*eps2)) * eps**2*eps2
 
         #self.log2.data[0] = 2**torch.round(torch.Tensor((math.log2(math.log2(2)/(eps)),)))
