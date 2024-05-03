@@ -226,12 +226,14 @@ class ModularizeActivationsPass(ModularizePass):
 
     @staticmethod
     def act_node_to_module(node):
+        remove_inst_args = ['input', '_stacklevel', 'dtype' ]
+        remove_call_args = ['input', '_stacklevel', 'dtype', 'dim']
         module_inst_args = node.args[1:]
-        module_inst_kwargs = {k:v for k,v in node.kwargs.items() if k != 'input'}
-        if node.target in inplace_act_functions:
+        module_inst_kwargs = {k:v for k,v in node.kwargs.items() if k not in remove_inst_args}
+        if node.target in ModularizeActivationsPass.inplace_act_functions:
             module_inst_kwargs['inplace'] = True
         module_call_args = node.args[0:1]
-        module_call_kwargs = {k:v for k,v in node.kwargs.items() if k == 'input'}
+        module_call_kwargs = {k:v for k,v in node.kwargs.items() if k not in remove_call_args}
         module_class = ModularizeActivationsPass.act_function_to_module[node.target]
         return (module_class(*module_inst_args, **module_inst_kwargs), module_call_args, module_call_kwargs)
 
