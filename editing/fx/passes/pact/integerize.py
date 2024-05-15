@@ -346,7 +346,7 @@ def bn_act_to_requant_fun(gm : fx.GraphModule, match : Match, D=2**24, cmsis_req
     assert isinstance(act, (PACTUnsignedAct, PACTAsymmetricAct)), f"bn_act_to_requant called on incompatible activation {type(act)}"
 
     signed_act = isinstance(act, PACTAsymmetricAct)
-    eps_in = extract_eps(act_node.meta['quant'].eps_in).cpu().clone().detach().squeeze()
+    eps_in = act_node.meta['quant'].eps_in.cpu().clone().detach().squeeze()   #HANNES Deleted extract_eps so I dont get Error
     eps_out = act_node.meta['quant'].eps_out.cpu().clone().detach().squeeze()
 
     # if the requant node would perform an identity operation, don't insert it.

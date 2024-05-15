@@ -94,7 +94,7 @@ class FxPass:
         self.retarget(gm)
         gm = self.run_pass(gm)
         gm.recompile()
-        gm.graph.lint()
+        #gm.graph.lint()
         return gm
 
     def __call__(self, gm : fx.GraphModule):

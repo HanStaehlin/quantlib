@@ -3096,3 +3096,42 @@ class PACTWrapModule(nn.Module):
             return z
         else:
             return y
+
+
+
+############################################################################################################
+
+class ConSmax(_PACTEps):
+    def __init__(self, n_levels : int = 256, dim: int = 1):
+        super().__init__(True)
+        self.n_levels = n_levels
+        self.dim = dim
+        self.register_buffer('lambda0', torch.Tensor((0.35815147,)))
+        self.register_buffer('beta0',  torch.Tensor((1.,)))
+        self.register_buffer('clip_gradient', torch.tensor(True))
+        self.register_buffer('floor', torch.tensor(False))
+
+    def set_eps_in(self, eps_list):
+        super().set_eps_in(eps_list)
+        self.updateCoeffs(self.eps_in)
+
+    def updateCoeffs(self, eps):
+        eps2 = torch.Tensor((0.3585,)).type_as(eps)
+        self.lambda0.data[0] = torch.round(0.3585/eps2) * eps2
+        self.beta0.data[0] = torch.round(1.353/eps) * eps
+        self.log2.data[0] = torch.round(math.log2(2)/(eps)) * eps
+
+    def forward(self, x):
+
+        def RQ(x, eps): # Dequant?
+            if self.started:
+                x = torch.floor(x/eps+0.5)*eps
+            return x
+
+        xTilde = x - RQ(torch.max(x, -1, keepdim=True)[0], self.eps_in)
+        z = -RQ(xTilde / self.log2, torch.Tensor((1.,)).type_as(x))
+        p = xTilde + z * self.log2
+        y = RQ((self.coeffA*(p + self.coeffB)**2 + self.coeffC) / 2**z, self.coeffA*self.eps_in**2)
+        ysum = torch.unsqueeze(torch.sum(y, -1), dim=-1)
+        out = RQ(y / (ysum), 1./self.n_levels)
+        return out
