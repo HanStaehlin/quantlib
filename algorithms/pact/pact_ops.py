@@ -93,8 +93,8 @@ class RequantShift(nn.Module):
                 lo = (c * -1)
                 hi = (c-1)
 
-                y_tilde = torch.where(torch.isfinite(y), torch.clip(y, min=lo, max=hi), y)
-                #y_tilde = torch.clip(y, min=lo, max=hi)
+                #y_tilde = torch.where(torch.isfinite(y), torch.clip(y, min=lo, max=hi), y)
+                y_tilde = torch.clip(y, min=lo, max=hi)
                 return y_tilde
 
         @staticmethod
@@ -463,7 +463,6 @@ class _PACTActivation(nn.Module):
     def forward(self, x):
         # if x.numel() == 0:
         #     return x
-
         if not self.started:
             if self.act_kind == 'identity':
                 res =  x
@@ -509,6 +508,7 @@ class _PACTActivation(nn.Module):
 
             return res
         else:
+
             res = x
 
             eps = self.get_eps()
@@ -1784,15 +1784,16 @@ class PACTIntegerSoftmax(torch.nn.Module):
     class MySoftmax(torch.autograd.Function):
 
         @staticmethod
-        def forward(ctx, x, log2, coeffA, coeffB, coeffC, n_levels, zero):
+        def forward(ctx, x, log2, coeffA, coeffB, coeffC, n_levels, zero, eps):
             # return torch.zeros_like(x)
 
             rqx = torch.max(x, -1, keepdim=True)[0]
             x[x <= (torch.finfo(x.dtype).min + torch.finfo(x.dtype).eps)] = torch.nan
 
-            xTilde = x - rqx
-            z = torch.floor((-xTilde / log2)*2**12)
-            p = xTilde + z * log2 /2**12
+            xTilde = (x - rqx)
+            z = torch.floor((-xTilde / log2))
+            p = xTilde + z * log2
+            #y = torch.floor(((coeffA * (p * eps+ coeffB)**2 + coeffC)*2**12) // (2**z))
             y = torch.floor(((coeffA * (p + coeffB)**2 + coeffC)) // (2**z))
             y[y.isnan()] = 0
             ysum = torch.sum(y, -1, keepdim = True)
@@ -1804,7 +1805,7 @@ class PACTIntegerSoftmax(torch.nn.Module):
 
         @staticmethod
         @parse_args('v', 't', 't', 't', 't', 't', 't')
-        def symbolic(g, x, log2, coeffA, coeffB, coeffC, n_levels, zero):
+        def symbolic(g, x, log2, coeffA, coeffB, coeffC, n_levels, zero, eps):
             #return g.op("PACTOps::iSoftmax", x, log2_f = log2, coeffA_f = coeffA, coeffB_f = coeffB, coeffC_f = coeffC, n_levels_f = n_levels)
 
             log2_ = g.op("Constant", value_t = log2)
@@ -1846,13 +1847,16 @@ class PACTIntegerSoftmax(torch.nn.Module):
         eps = eps
         eps2 = torch.Tensor((0.3585,))
 
+        # self.coeffA.data[0] = torch.round(torch.Tensor((0.3585,))*2**12)/2**12
+        # self.coeffB.data[0] = torch.round(torch.Tensor((1.353,))*2**12)/2**12
+        # self.coeffC.data[0] = torch.round(torch.Tensor((0.344,))*2**12)/2**12
         self.coeffA.data[0] = torch.round(0.3585 / eps2)
         self.coeffB.data[0] = torch.round(1.353 / eps)
         self.coeffC.data[0] = torch.round(0.344 / (eps**2 * eps2))
 
         #self.log2.data[0] = 2**torch.round(torch.Tensor((math.log2(math.log2(2)/(eps)),)))
         #self.log2.data[0] = torch.round(torch.Tensor((math.log2(2)/(eps)),))
-        self.log2.data[0] = torch.round(math.log2(2) / (eps)*(2**12))
+        self.log2.data[0] = torch.round(torch.tensor(math.log(2)*(2**12)/eps,))/2**12
 
     def forward(self, x):
         """Approximate Softmax implementation according to the I-BERT paper:
@@ -1865,10 +1869,10 @@ class PACTIntegerSoftmax(torch.nn.Module):
         """
         if self.export_node:
             return self.MySoftmax.apply(x, self.log2.type_as(x), self.coeffA.type_as(x), self.coeffB.type_as(x),
-                                        self.coeffC.type_as(x), self.n_levels.type_as(x), self.zero.type_as(x))
+                                        self.coeffC.type_as(x), self.n_levels.type_as(x), self.zero.type_as(x), self.eps_in.type_as(x))
         else:
             return self.MySoftmax.forward(None, x, self.log2.type_as(x), self.coeffA.type_as(x), self.coeffB.type_as(x),
-                                          self.coeffC.type_as(x), self.n_levels.type_as(x), self.zero.type_as(x))
+                                          self.coeffC.type_as(x), self.n_levels.type_as(x), self.zero.type_as(x), self.eps_in.type_as(x))
 
     def __repr__(self):
         return f"PACTIntegerSoftmax(n_levels={self.n_levels.item()}, eps_in={self.eps_in}, coeffA={self.coeffA.item()}, coeffB={self.coeffB.item()}, coeffC={self.coeffC.item()}, log2={self.log2.item()})"
@@ -1986,10 +1990,10 @@ class PACTIntegerITAMax(torch.nn.Module):
             # Update the accumulated sum and add the accumulation over the current part of the row
             exp_sum = torch.floor(torch.sum(n_levels / 2**shift, dim = -1))
 
-            exp_sum_inverse = torch.floor(n_levels * (n_levels - 1) / exp_sum)
+            exp_sum_inverse = torch.floor(n_levels * (n_levels - 1)*2**12/ exp_sum)/2**12
 
             # Calculate the activation value
-            ret = torch.floor(torch.repeat_interleave(exp_sum_inverse, S).reshape(-1, H, S, S) / 2**shift).type_as(x)
+            ret = torch.floor(torch.repeat_interleave(exp_sum_inverse, S).reshape(-1, H, S, S) / 2**(shift)).type_as(x)
             ret[ret.isnan()] = 0
             return ret
 
